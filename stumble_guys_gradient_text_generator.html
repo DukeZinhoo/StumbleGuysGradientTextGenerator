@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stumble Guys gradient text generator by dukezinho</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#020202',
+                        panelbg: '#0a0a0c',
+                        bordercolor: '#1a1a22'
+                    },
+                    fontFamily: {
+                        lilita: ['"Lilita One"', 'cursive', 'sans-serif'],
+                        mono: ['"Fira Code"', 'monospace', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Lilita One & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lilita+One&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020202;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        .font-lilita {
+            font-family: 'Lilita One', cursive;
+        }
+
+        /* Live Animated RGB Gradient Title */
+        @keyframes animated-rgb {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        .rgb-live-title {
+            background: linear-gradient(
+                90deg, 
+                #ff0000, 
+                #ff7f00, 
+                #ffff00, 
+                #00ff00, 
+                #00ffff, 
+                #0000ff, 
+                #8b00ff, 
+                #ff0000
+            );
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: animated-rgb 6s ease infinite;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.25));
+        }
+
+        /* Game text heavy stroke shadow */
+        .game-text-shadow {
+            text-shadow: 
+                -2px -2px 0 #000,  
+                 2px -2px 0 #000,
+                -2px  2px 0 #000,
+                 2px  2px 0 #000,
+                 0px  6px 12px rgba(0,0,0,0.9);
+        }
+        /* Custom Sparkle Trail Canvas */
+        #sparkle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        /* Glossy glowing card effect */
+        .glow-card {
+            background: linear-gradient(180deg, rgba(18, 18, 26, 0.7) 0%, rgba(8, 8, 12, 0.9) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+        .glow-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        /* Custom Scrollbar */
+        textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: #050508;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background: #222233;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-[#020202] text-slate-100 relative selection:bg-white selection:text-black">
+
+    <!-- Interactive Mouse Sparkle Overlay Canvas -->
+    <canvas id="sparkle-canvas"></canvas>
+
+    <!-- Main Container -->
+    <div class="w-full max-w-3xl mx-auto px-4 py-10 flex-grow flex flex-col justify-center items-center z-10">
+
+        <!-- Header Titles -->
+        <header class="text-center mb-8 space-y-2">
+            <h1 class="font-lilita text-4xl md:text-5xl lg:text-6xl tracking-wide rgb-live-title pb-1">
+                Stumble Guys Gradient Text Generator
+            </h1>
+            <p class="font-lilita text-lg md:text-xl text-slate-400 tracking-wider">
+                by <span class="text-white underline decoration-purple-500/80 decoration-2 underline-offset-4">DukeZinho</span>
+            </p>
+        </header>
+
+        <!-- Main Workspace Card -->
+        <main class="w-full glow-card rounded-3xl p-6 sm:p-8 space-y-6 backdrop-blur-xl">
+
+            <!-- 1. Live Preview Section (Middle Display) -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center px-1">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fa-solid fa-eye text-white"></i> Live Preview
+                    </span>
+                    <span class="text-[10px] text-slate-500 font-mono">Rendered Output</span>
+                </div>
+                <div class="w-full min-h-[160px] sm:min-h-[180px] bg-[#040406] border border-white/5 rounded-2xl p-6 flex items-center justify-center text-center overflow-x-auto relative shadow-inner">
+                    <div id="preview-text" class="font-lilita text-3xl sm:text-4xl md:text-5xl tracking-wide game-text-shadow break-all transition-all duration-150">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Text Input Box -->
+            <div class="space-y-2">
+                <label for="text-input" class="block text-xs font-semibold text-slate-400 uppercase tracking-widest flex justify-between items-center px-1">
+                    <span>Input Text</span>
+                    <span class="text-[10px] text-slate-500 font-normal">Supports tags like &lt;sup&gt; &lt;b&gt;</span>
+                </label>
+                <div class="relative">
+                    <input type="text" id="text-input" value="Nickname" 
+                        class="w-full bg-[#050508] border border-white/10 rounded-xl px-4 py-3.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-white/30 transition-all font-sans text-sm sm:text-base"
+                        placeholder="Type your text here...">
+                    <button id="clear-btn" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-200 p-1 transition-colors">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. Color Selection (Start & End Colors) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                <!-- Start Color -->
+                <div class="bg-[#050508] border border-white/5 p-4 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block shadow-sm"></span> Start Color
+                        </label>
+                        <span id="start-hex-label" class="text-xs font-mono text-slate-300 font-bold">#FF0000</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="start-color" value="#FF0000" class="w-12 h-10 rounded-lg cursor-pointer bg-transparent border-0 p-0">
+                        <input type="text" id="start-hex" value="#FF0000" class="w-full bg-[#08080c] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono uppercase text-slate-200 focus:outline-none focus:border-white/30">
+                    </div>
+                </div>
+
+                <!-- End Color -->
+                <div class="bg-[#050508] border border-white/5 p-4 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 inline-block shadow-sm"></span> End Color
+                        </label>
+                        <span id="end-hex-label" class="text-xs font-mono text-slate-300 font-bold">#FFFF00</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="end-color" value="#FFFF00" class="w-12 h-10 rounded-lg cursor-pointer bg-transparent border-0 p-0">
+                        <input type="text" id="end-hex" value="#FFFF00" class="w-full bg-[#08080c] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono uppercase text-slate-200 focus:outline-none focus:border-white/30">
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 4. Generated Output Code Container -->
+            <div class="space-y-2">
+                <div class="flex items-center justify-between px-1">
+                    <label for="code-output" class="text-xs font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fa-solid fa-code text-white"></i> Rich Text Output
+                    </label>
+                    <span id="char-count" class="text-[10px] text-slate-500 font-mono">0 chars</span>
+                </div>
+                <textarea id="code-output" readonly 
+                    class="w-full h-28 bg-[#040406] border border-white/10 rounded-xl p-3.5 font-mono text-xs text-slate-300 focus:outline-none focus:border-white/30 resize-none break-all select-all leading-relaxed"></textarea>
+            </div>
+
+            <!-- 5. Copy Code Action Button -->
+            <div>
+                <button id="copy-btn" class="w-full bg-white hover:bg-slate-200 text-black font-lilita text-lg py-4 px-6 rounded-xl shadow-lg transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-copy text-base"></i>
+                    <span id="copy-btn-text">Copy Text Code</span>
+                </button>
+            </div>
+
+        </main>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-8 bg-white text-black px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-2 transition-all duration-300 opacity-0 translate-y-10 pointer-events-none z-50 text-sm">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span>Copied to clipboard!</span>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full py-6 text-center text-xs text-slate-600 border-t border-white/5 relative z-10">
+        <p>Stumble Guys & TextMeshPro Rich Text Generator • Created by <span class="text-slate-400 font-medium">DukeZinho</span></p>
+    </footer>
+
+    <!-- Logic Script -->
+    <script>
+        // --- Interactive Sparkle Mouse Trail Effect ---
+        const canvas = document.getElementById('sparkle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 4 + 2;
+                this.speedX = (Math.random() - 0.5) * 1.5;
+                this.speedY = (Math.random() - 0.5) * 1.5;
+                this.life = 1;
+                this.decay = Math.random() * 0.03 + 0.015;
+                this.rotation = Math.random() * Math.PI;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life -= this.decay;
+            }
+            draw() {
+                if (this.life <= 0) return;
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.life})`;
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+                ctx.shadowBlur = 8;
+
+                // Draw 4-point star burst
+                ctx.beginPath();
+                for (let i = 0; i < 4; i++) {
+                    ctx.lineTo(Math.cos((i * Math.PI) / 2) * this.size, Math.sin((i * Math.PI) / 2) * this.size);
+                    ctx.lineTo(Math.cos((i * Math.PI) / 2 + Math.PI / 4) * (this.size / 3), Math.sin((i * Math.PI) / 2 + Math.PI / 4) * (this.size / 3));
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            for (let i = 0; i < 2; i++) {
+                particles.push(new Particle(e.clientX, e.clientY));
+            }
+        });
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // --- Generator Logic ---
+        const textInput = document.getElementById('text-input');
+        const clearBtn = document.getElementById('clear-btn');
+        const startColor = document.getElementById('start-color');
+        const startHex = document.getElementById('start-hex');
+        const startHexLabel = document.getElementById('start-hex-label');
+        const endColor = document.getElementById('end-color');
+        const endHex = document.getElementById('end-hex');
+        const endHexLabel = document.getElementById('end-hex-label');
+
+        const previewText = document.getElementById('preview-text');
+        const codeOutput = document.getElementById('code-output');
+        const charCount = document.getElementById('char-count');
+        const copyBtn = document.getElementById('copy-btn');
+        const copyBtnText = document.getElementById('copy-btn-text');
+        const toast = document.getElementById('toast');
+
+        function hexToRgb(hex) {
+            hex = hex.replace(/^#/, '');
+            if (hex.length === 3) {
+                hex = hex.split('').map(c => c + c).join('');
+            }
+            const num = parseInt(hex, 16);
+            return isNaN(num) ? [0, 0, 0] : [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+        }
+
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => {
+                const hex = Math.round(x).toString(16).toUpperCase();
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+        }
+
+        function interpolateColor(color1, color2, factor) {
+            const rgb1 = hexToRgb(color1);
+            const rgb2 = hexToRgb(color2);
+            const result = [
+                rgb1[0] + factor * (rgb2[0] - rgb1[0]),
+                rgb1[1] + factor * (rgb2[1] - rgb1[1]),
+                rgb1[2] + factor * (rgb2[2] - rgb1[2])
+            ];
+            return rgbToHex(result[0], result[1], result[2]);
+        }
+
+        function generateGradient() {
+            const text = textInput.value;
+            const cStart = startHex.value;
+            const cEnd = endHex.value;
+
+            if (!text) {
+                previewText.innerHTML = '<span class="text-slate-600 italic font-sans text-base">Type something above...</span>';
+                codeOutput.value = '';
+                charCount.innerText = '0 chars';
+                return;
+            }
+
+            // Parse text while preserving HTML/RichText tags (e.g. <sup>...</sup>)
+            const tokens = [];
+            const tagRegex = /(<[^>]+>)/g;
+            const matches = [...text.matchAll(tagRegex)];
+
+            let plainTextLength = 0;
+
+            if (matches.length === 0) {
+                for (let i = 0; i < text.length; i++) {
+                    tokens.push({ type: 'char', value: text[i] });
+                    if (text[i] !== ' ') plainTextLength++;
+                }
+            } else {
+                let currentPos = 0;
+                for (const m of matches) {
+                    const tagStart = m.index;
+                    const tagStr = m[0];
+
+                    if (tagStart > currentPos) {
+                        const sub = text.slice(currentPos, tagStart);
+                        for (let i = 0; i < sub.length; i++) {
+                            tokens.push({ type: 'char', value: sub[i] });
+                            if (sub[i] !== ' ') plainTextLength++;
+                        }
+                    }
+
+                    tokens.push({ type: 'tag', value: tagStr });
+                    currentPos = tagStart + tagStr.length;
+                }
+
+                if (currentPos < text.length) {
+                    const sub = text.slice(currentPos);
+                    for (let i = 0; i < sub.length; i++) {
+                        tokens.push({ type: 'char', value: sub[i] });
+                        if (sub[i] !== ' ') plainTextLength++;
+                    }
+                }
+            }
+
+            let richTextOutput = '';
+            let htmlPreview = '';
+            let charIndex = 0;
+            const total = Math.max(1, plainTextLength - 1);
+
+            tokens.forEach(tok => {
+                if (tok.type === 'tag') {
+                    richTextOutput += tok.value;
+                    htmlPreview += tok.value;
+                } else {
+                    const ch = tok.value;
+                    if (ch === ' ') {
+                        richTextOutput += ' ';
+                        htmlPreview += ' ';
+                    } else {
+                        const factor = total > 0 ? charIndex / total : 0;
+                        const hex = interpolateColor(cStart, cEnd, factor);
+
+                        richTextOutput += `<${hex}>${ch}`;
+                        htmlPreview += `<span style="color: ${hex}">${ch}</span>`;
+                        charIndex++;
+                    }
+                }
+            });
+
+            previewText.innerHTML = htmlPreview;
+            codeOutput.value = richTextOutput;
+            charCount.innerText = `${richTextOutput.length} chars`;
+        }
+
+        // Color Synchronizers
+        function bindColorPicker(picker, input, label) {
+            picker.addEventListener('input', (e) => {
+                const val = e.target.value.toUpperCase();
+                input.value = val;
+                label.innerText = val;
+                generateGradient();
+            });
+
+            input.addEventListener('input', (e) => {
+                let val = e.target.value;
+                if (!val.startsWith('#')) val = '#' + val;
+                if (/^#[0-9A-F]{6}$/i.test(val)) {
+                    picker.value = val;
+                    label.innerText = val.toUpperCase();
+                    generateGradient();
+                }
+            });
+        }
+
+        bindColorPicker(startColor, startHex, startHexLabel);
+        bindColorPicker(endColor, endHex, endHexLabel);
+
+        textInput.addEventListener('input', generateGradient);
+
+        clearBtn.addEventListener('click', () => {
+            textInput.value = '';
+            textInput.focus();
+            generateGradient();
+        });
+
+        // Copy to Clipboard
+        copyBtn.addEventListener('click', () => {
+            const textToCopy = codeOutput.value;
+            if (!textToCopy) return;
+
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+
+            try {
+                document.execCommand('copy');
+                showToast();
+            } catch (err) {
+                console.error('Failed to copy', err);
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        });
+
+        function showToast() {
+            copyBtnText.innerText = "Copied!";
+            copyBtn.classList.remove('bg-white', 'hover:bg-slate-200');
+            copyBtn.classList.add('bg-emerald-400', 'text-black');
+
+            toast.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+
+            setTimeout(() => {
+                copyBtnText.innerText = "Copy Text Code";
+                copyBtn.classList.remove('bg-emerald-400');
+                copyBtn.classList.add('bg-white', 'hover:bg-slate-200');
+
+                toast.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+            }, 2000);
+        }
+
+        // Initialize
+        window.onload = function() {
+            generateGradient();
+        };
+    </script>
+</body>
+</html>
